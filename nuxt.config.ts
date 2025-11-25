@@ -11,16 +11,12 @@ export default defineNuxtConfig({
      * KEYCLOAK RUNTIME (server only)
      */
     keycloak: {
-      baseUrl: process.env.KEYCLOAK_BASE_URL || "http://localhost:8080",
-      realm: process.env.KEYCLOAK_REALM || "myrealm",
-      clientId: process.env.KEYCLOAK_CLIENT_ID || "nuxt-client",
+      baseUrl: process.env.KEYCLOAK_BASE_URL,
+      realm: process.env.KEYCLOAK_REALM,
+      clientId: process.env.KEYCLOAK_CLIENT_ID,
 
-      redirectUri:
-        process.env.KEYCLOAK_REDIRECT_URI ||
-        "http://localhost:3000/api/auth/callback",
-
-      logoutRedirectUri:
-        process.env.KEYCLOAK_LOGOUT_REDIRECT_URI || "http://localhost:3000/",
+      redirectUri: process.env.KEYCLOAK_REDIRECT_URI,
+      logoutRedirectUri: process.env.KEYCLOAK_LOGOUT_REDIRECT_URI,
 
       cookieName: "kc_token",
       cookieSameSite: "lax",
@@ -31,8 +27,8 @@ export default defineNuxtConfig({
      * PRO FEATURES (server only)
      */
     keycloakPro: {
-      licenseKey: process.env.KEYCLOAK_LICENSE_KEY || "",
-      licensePublicKey: process.env.KEYCLOAK_LICENSE_PUBLIC_KEY || "",
+      licenseKey: process.env.KEYCLOAK_LICENSE_KEY,
+      licensePublicKey: process.env.KEYCLOAK_LICENSE_PUBLIC_KEY,
       debug: false,
       loginTemplate: process.env.KEYCLOAK_LOGIN_TEMPLATE || "default",
     },
@@ -42,20 +38,18 @@ export default defineNuxtConfig({
      */
     public: {
       keycloak: {
-        baseUrl: process.env.KEYCLOAK_BASE_URL || "http://localhost:8080",
-        realm: process.env.KEYCLOAK_REALM || "myrealm",
-        clientId: process.env.KEYCLOAK_CLIENT_ID || "nuxt-client",
+        baseUrl: process.env.KEYCLOAK_BASE_URL,
+        realm: process.env.KEYCLOAK_REALM,
+        clientId: process.env.KEYCLOAK_CLIENT_ID,
+        redirectUri: process.env.KEYCLOAK_REDIRECT_URI,
 
-        redirectUri:
-          process.env.KEYCLOAK_REDIRECT_URI ||
-          "http://localhost:3000/api/auth/callback",
-
-        logoutRedirectUri:
-          process.env.KEYCLOAK_LOGOUT_REDIRECT_URI || "http://localhost:3000/",
+        logoutRedirectUri: process.env.KEYCLOAK_LOGOUT_REDIRECT_URI,
       },
 
       keycloakPro: {
         loginTemplate: process.env.KEYCLOAK_LOGIN_TEMPLATE || "default",
+        licenseKey: process.env.KEYCLOAK_LICENSE_KEY,
+        licensePublicKey: process.env.KEYCLOAK_LICENSE_PUBLIC_KEY,
       },
     },
   },

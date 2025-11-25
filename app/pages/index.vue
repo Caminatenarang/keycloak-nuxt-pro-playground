@@ -1,204 +1,285 @@
 <script setup lang="ts">
-const { isAuthenticated, user, loading, login, logout, fetchSession } = useKeycloak()
+const { isAuthenticated, user, loading, login, fetchSession } = useKeycloak()
 
 onMounted(() => {
   fetchSession()
 })
 
 const handleLogin = () => login({ redirect: '/private' })
-const handleLogout = () => logout({ redirect: '/' })
 </script>
 
 <template>
-  <section class="layout">
-    <div class="card hero">
-      <p class="eyebrow">Keycloak + Nuxt</p>
-      <h2>Fluxo PKCE pronto para SSR, rotas protegidas e cookies HttpOnly.</h2>
-      <p class="muted">
-        Use os botões abaixo para iniciar o fluxo de login, acessar a rota privada ou inspecionar a
-        sessão via endpoint.
+  <div class="page">
+    <div class="glow glow-a" />
+    <div class="glow glow-b" />
+
+    <section class="card hero">
+      <div class="hero-meta">
+        <span class="pill">@caminatenarang/keycloak-nuxt-pro</span>
+        <span class="pill subtle">PKCE • SSR • HttpOnly</span>
+      </div>
+      <h1>Keycloak + Nuxt PKCE Pro</h1>
+      <p class="lede">
+        Auth PKCE com SSR, HttpOnly cookies, middleware global, templates de login e suporte a
+        Keycloak Cloud.
       </p>
       <div class="actions">
         <button :disabled="loading" @click="handleLogin">
-          {{ loading ? 'Redirecionando...' : 'Login com Keycloak' }}
+          {{ loading ? 'Redirecionando...' : 'Login via Keycloak' }}
         </button>
-        <NuxtLink class="secondary" to="/private">Ir para /private</NuxtLink>
-        <NuxtLink class="secondary" to="/session">Ver sessão</NuxtLink>
-        <button class="ghost" @click="handleLogout">Logout</button>
+        <NuxtLink class="ghost" to="/session">Ver sessão</NuxtLink>
       </div>
-    </div>
-
-    <div class="card">
-      <header>
-        <p class="eyebrow">Estado</p>
-        <strong class="status" :class="{ ok: isAuthenticated }">
-          {{ isAuthenticated ? 'Autenticado' : 'Anônimo' }}
-        </strong>
-      </header>
-      <dl>
-        <div>
-          <dt>Usuário</dt>
-          <dd>{{ user?.preferred_username || '—' }}</dd>
+      <div class="status-grid">
+        <div class="mini-card">
+          <p class="label">Estado</p>
+          <span class="status" :class="{ ok: isAuthenticated }">
+            {{ isAuthenticated ? 'Autenticado' : 'Anônimo' }}
+          </span>
         </div>
-        <div>
-          <dt>ID</dt>
-          <dd class="mono">{{ user?.sub || '—' }}</dd>
+        <div class="mini-card">
+          <p class="label">Utilizador</p>
+          <p class="mono">{{ user?.preferred_username || '—' }}</p>
         </div>
-        <div>
-          <dt>Nome</dt>
-          <dd>{{ user?.name || '—' }}</dd>
+        <div class="mini-card">
+          <p class="label">Rota protegida</p>
+          <NuxtLink class="link" to="/private">Ir para /private →</NuxtLink>
         </div>
-      </dl>
-    </div>
+      </div>
+    </section>
 
-    <div class="card">
-      <header>
-        <p class="eyebrow">Fluxo rápido</p>
+    <section class="card feature-block">
+      <header class="section-head">
+        <div>
+          <p class="eyebrow">Features principais</p>
+          <h2>Pronto para produção</h2>
+        </div>
+        <NuxtLink class="link" to="/session">Ver sessão em tempo real</NuxtLink>
       </header>
-      <ol class="steps">
-        <li>Configure as variáveis de ambiente (.env) conforme o README.</li>
-        <li>Rode <code>npm install</code> e <code>npm run dev</code>.</li>
-        <li>Abra <NuxtLink to="/api/auth/login?redirect=/private">/api/auth/login</NuxtLink> e faça
-          login.</li>
-        <li>Você volta para <code>/private</code>; veja a sessão em <code>/session</code>.</li>
-      </ol>
-    </div>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <div class="icon">🔐</div>
+          <h3>PKCE + HttpOnly secure auth</h3>
+          <p>Fluxo completo com troca de code server-side, refresh e cookies seguros para SSR.</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon">🧭</div>
+          <h3>Middleware SSR para rotas privadas</h3>
+          <p>Proteção automática de páginas com validação de sessão antes de renderizar.</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon">🎨</div>
+          <h3>Templates de login personalizados</h3>
+          <p>Escolha entre default, split ou minimal sem mexer no fluxo principal.</p>
+        </article>
+      </div>
+    </section>
 
-    <div class="card">
-      <header>
-        <p class="eyebrow">Endpoints prontos</p>
+    <section class="card quick-demo">
+      <header class="section-head">
+        <div>
+          <p class="eyebrow">Demo rápida</p>
+          <h2>Teste agora</h2>
+        </div>
+        <p class="hint">Fluxos reais já prontos em SSR</p>
       </header>
-      <ul class="list">
-        <li><code>GET /api/auth/login</code> – PKCE + redirect</li>
-        <li><code>GET /api/auth/callback</code> – troca code, grava cookie</li>
-        <li><code>GET /api/auth/session</code> – estado atual</li>
-        <li><code>POST /api/auth/refresh</code> – renova tokens</li>
-        <li><code>POST /api/auth/logout</code> – apaga cookie e backchannel</li>
-      </ul>
-    </div>
-  </section>
+      <div class="demo-grid">
+        <NuxtLink class="demo-card" to="/session">
+          <span class="tag">/session</span>
+          <p>Estado da sessão e claims do usuário.</p>
+        </NuxtLink>
+        <NuxtLink class="demo-card" to="/private">
+          <span class="tag">/private</span>
+          <p>Rota protegida com middleware global.</p>
+        </NuxtLink>
+        <NuxtLink class="demo-card" to="/auth/error">
+          <span class="tag">/auth/error</span>
+          <p>Exemplo de tela de erro para fluxo de auth.</p>
+        </NuxtLink>
+      </div>
+    </section>
+
+    <section class="card code">
+      <header class="section-head">
+        <div>
+          <p class="eyebrow">Como funciona</p>
+          <h2>Integração em minutos</h2>
+        </div>
+        <p class="hint">Uso direto com composables do módulo</p>
+      </header>
+      <div class="code-grid">
+        <div class="code-card">
+          <p class="label">Login</p>
+          <pre><code>const { login } = useKeycloak()</code></pre>
+        </div>
+        <div class="code-card">
+          <p class="label">Proteger rota</p>
+          <pre><code>definePageMeta({ auth: true })</code></pre>
+        </div>
+        <div class="code-card">
+          <p class="label">Sessão</p>
+          <pre><code>const { user } = useKeycloak()</code></pre>
+        </div>
+      </div>
+    </section>
+  </div>
 </template>
 
 <style scoped>
-.layout {
-  width: min(1040px, 100%);
+.page {
+  position: relative;
+  width: min(1160px, 100%);
   display: grid;
   gap: 18px;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  filter: blur(120px);
+  opacity: 0.6;
+}
+
+.glow-a {
+  background: radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.25), transparent 35%);
+}
+
+.glow-b {
+  background: radial-gradient(circle at 80% 10%, rgba(94, 234, 212, 0.22), transparent 30%);
 }
 
 .card {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(6px);
+  position: relative;
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
 }
 
 .hero {
-  grid-column: 1 / -1;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(94, 234, 212, 0.06));
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(94, 234, 212, 0.06)),
+    rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.25);
 }
 
-.eyebrow {
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.hero-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.16);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #e0f2fe;
   font-size: 12px;
-  color: #7dd3fc;
-  margin-bottom: 6px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-h2 {
-  margin: 0 0 6px;
+.pill.subtle {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.28);
 }
 
-.muted {
+h1 {
+  margin: 6px 0 6px;
+  font-size: clamp(32px, 4vw, 44px);
+  color: #f8fafc;
+  letter-spacing: -0.02em;
+}
+
+.lede {
+  margin: 0 0 14px;
   color: #cbd5e1;
-  margin: 0 0 12px;
+  font-size: 18px;
+  max-width: 720px;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 12px;
+  margin: 12px 0 6px;
 }
 
 button,
-.secondary {
+.ghost {
   border: none;
   outline: none;
-  padding: 10px 14px;
-  border-radius: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 15px;
+  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+}
+
+button {
   color: #0f172a;
   background: linear-gradient(120deg, #22d3ee, #a5f3fc);
-  box-shadow: 0 8px 22px rgba(34, 211, 238, 0.35);
-  text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  box-shadow: 0 10px 28px rgba(34, 211, 238, 0.35);
 }
 
 button:disabled {
-  opacity: 0.6;
+  opacity: 0.7;
   cursor: not-allowed;
-}
-
-button:hover:not(:disabled),
-.secondary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 26px rgba(34, 211, 238, 0.45);
-}
-
-.secondary {
-  background: rgba(148, 163, 184, 0.12);
-  color: #e2e8f0;
   box-shadow: none;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px rgba(34, 211, 238, 0.45);
 }
 
 .ghost {
-  background: transparent;
   color: #e2e8f0;
-  border: 1px dashed rgba(148, 163, 184, 0.4);
-  box-shadow: none;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.26);
 }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
+.ghost:hover {
+  border-color: rgba(94, 234, 212, 0.6);
+  color: #67e8f9;
 }
 
-dl {
+.status-grid {
+  margin-top: 18px;
   display: grid;
-  grid-template-columns: 120px 1fr;
-  row-gap: 10px;
-  column-gap: 6px;
-  margin: 0;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
 }
 
-dt {
+.mini-card {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.label {
   color: #94a3b8;
-}
-
-dd {
-  margin: 0;
-}
-
-.mono {
-  font-family: 'SFMono-Regular', ui-monospace, Menlo, monospace;
   font-size: 13px;
+  margin: 0 0 6px;
 }
 
 .status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 6px 10px;
   border-radius: 12px;
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(248, 113, 113, 0.18);
   color: #fecdd3;
+  font-weight: 700;
 }
 
 .status.ok {
@@ -206,36 +287,141 @@ dd {
   color: #bbf7d0;
 }
 
-.steps {
+.mono {
   margin: 0;
-  padding-left: 20px;
+  font-family: 'SFMono-Regular', ui-monospace, Menlo, monospace;
+  color: #e2e8f0;
+  font-size: 14px;
+}
+
+.link {
+  color: #67e8f9;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.eyebrow {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #7dd3fc;
+  margin: 0 0 6px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #f8fafc;
+}
+
+.hint {
+  margin: 0;
+  color: #94a3b8;
+}
+
+.feature-grid,
+.demo-grid,
+.code-grid {
   display: grid;
-  gap: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.feature-card,
+.demo-card,
+.code-card {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 14px;
+  transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.feature-card:hover,
+.demo-card:hover,
+.code-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(94, 234, 212, 0.45);
+  background: rgba(15, 23, 42, 0.75);
+}
+
+.feature-card h3 {
+  margin: 6px 0 6px;
+  color: #e2e8f0;
+  font-size: 17px;
+}
+
+.feature-card p {
+  margin: 0;
   color: #cbd5e1;
 }
 
-.list {
-  list-style: disc;
-  padding-left: 20px;
-  color: #cbd5e1;
+.icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   display: grid;
-  gap: 6px;
+  place-items: center;
+  background: rgba(94, 234, 212, 0.14);
+  border: 1px solid rgba(94, 234, 212, 0.35);
+  font-size: 18px;
 }
 
-code {
-  background: rgba(148, 163, 184, 0.12);
-  padding: 2px 6px;
-  border-radius: 8px;
-  font-size: 13px;
+.demo-card {
+  text-decoration: none;
 }
 
-@media (max-width: 640px) {
-  .layout {
-    grid-template-columns: 1fr;
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #e0f2fe;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.demo-card p {
+  margin: 6px 0 0;
+  color: #cbd5e1;
+}
+
+.code pre {
+  margin: 0;
+}
+
+pre {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  padding: 10px;
+  border-radius: 12px;
+  color: #e2e8f0;
+  font-size: 14px;
+  overflow-x: auto;
+}
+
+@media (max-width: 720px) {
+  .actions {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  dl {
-    grid-template-columns: 1fr;
+  button,
+  .ghost {
+    width: 100%;
+    text-align: center;
   }
 }
 </style>

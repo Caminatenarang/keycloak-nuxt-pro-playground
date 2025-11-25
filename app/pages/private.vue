@@ -1,100 +1,165 @@
 <script setup lang="ts">
 definePageMeta({ auth: true })
 
-const { user, isAuthenticated, loading, login, logout, refresh, fetchSession } = useKeycloak()
+const { user, isAuthenticated, loading, logout, fetchSession } = useKeycloak()
+
+const session = ref<Record<string, unknown> | null>(null)
+
+const loadSession = async () => {
+  const data = await fetchSession()
+  session.value = data
+}
 
 onMounted(() => {
-  fetchSession()
+  loadSession()
 })
 
-const handleRefresh = async () => {
-  await refresh()
-  await fetchSession()
+const sessionJson = computed(() => session.value ? JSON.stringify(session.value, null, 2) : '—')
+
+const handleLogout = async () => {
+  await logout({ redirect: '/' })
 }
 </script>
 
 <template>
-  <section class="card">
-    <p class="eyebrow">Rota protegida</p>
-    <h2>Você está em /private</h2>
-    <p class="muted">O middleware global confirmou a sessão antes de renderizar esta página.</p>
+  <div class="page">
+    <div class="glow glow-a" />
+    <div class="glow glow-b" />
 
-    <div class="status" :class="{ ok: isAuthenticated }">
-      {{ isAuthenticated ? 'Autenticado' : 'Anônimo' }}
-    </div>
+    <section class="card hero">
+      <div class="meta">
+        <span class="pill">Rota protegida</span>
+        <span class="pill subtle">SSR + middleware</span>
+      </div>
+      <h1>Bem-vindo, {{ user?.preferred_username }}</h1>
+      <p class="lede">
+        Esta página só renderiza com sessão válida em SSR. Use os botões para atualizar o estado ou
+        sair.
+      </p>
+      <div class="status-row">
+        <span class="status" :class="{ ok: isAuthenticated }">
+          {{ isAuthenticated ? 'Autenticado' : 'Anônimo' }}
+        </span>
+        <NuxtLink class="link" to="/">Voltar ao início →</NuxtLink>
+      </div>
+      <div class="actions">
+        <button :disabled="loading" @click="loadSession">
+          {{ loading ? 'A atualizar...' : 'Atualizar sessão' }}
+        </button>
+        <button class="ghost" :disabled="loading" @click="handleLogout">
+          {{ loading ? 'Saindo...' : 'Logout' }}
+        </button>
+      </div>
+    </section>
 
-    <div class="grid">
-      <div>
-        <p class="label">Username</p>
-        <p class="value">{{ user?.preferred_username || '—' }}</p>
-      </div>
-      <div>
-        <p class="label">Name</p>
-        <p class="value">{{ user?.name || '—' }}</p>
-      </div>
-      <div>
-        <p class="label">ID (sub)</p>
-        <p class="value mono">{{ user?.sub || '—' }}</p>
-      </div>
-      <div>
-        <p class="label">Email</p>
-        <p class="value">{{ user?.email || '—' }}</p>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button :disabled="loading" @click="handleRefresh">Refresh token</button>
-      <NuxtLink class="secondary" to="/">Voltar ao início</NuxtLink>
-      <button class="ghost" @click="logout({ redirect: '/' })">Logout</button>
-    </div>
-
-    <p class="muted small">
-      Se quiser simular ausência de sessão, clique em Logout e volte aqui: o middleware redirecionará
-      para <code>/api/auth/login?redirect=/private</code>.
-    </p>
-  </section>
+    <section class="card">
+      <header class="section-head">
+        <div>
+          <p class="eyebrow">Sessão SSR</p>
+          <h2>Payload atual</h2>
+        </div>
+        <p class="hint">Retorno de /api/auth/session</p>
+      </header>
+      <pre>{{ sessionJson }}</pre>
+    </section>
+  </div>
 </template>
 
 <style scoped>
+.page {
+  position: relative;
+  width: min(960px, 100%);
+  display: grid;
+  gap: 16px;
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  filter: blur(120px);
+  opacity: 0.5;
+}
+
+.glow-a {
+  background: radial-gradient(circle at 12% 10%, rgba(56, 189, 248, 0.2), transparent 32%);
+}
+
+.glow-b {
+  background: radial-gradient(circle at 80% 0%, rgba(94, 234, 212, 0.2), transparent 30%);
+}
+
 .card {
-  width: min(840px, 100%);
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  position: relative;
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 18px;
   padding: 20px;
-  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
 }
 
-.eyebrow {
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.hero {
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(94, 234, 212, 0.06)),
+    rgba(15, 23, 42, 0.85);
+}
+
+.meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.16);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #e0f2fe;
   font-size: 12px;
-  color: #7dd3fc;
-  margin-bottom: 6px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-h2 {
-  margin: 0 0 6px;
+.pill.subtle {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.28);
 }
 
-.muted {
-  color: #cbd5e1;
+h1 {
+  margin: 6px 0 6px;
+  font-size: clamp(28px, 4vw, 38px);
+  color: #f8fafc;
+  letter-spacing: -0.02em;
+}
+
+.lede {
   margin: 0 0 12px;
+  color: #cbd5e1;
+  font-size: 17px;
+  max-width: 720px;
 }
 
-.muted.small {
-  font-size: 13px;
-  margin-top: 14px;
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 
 .status {
-  display: inline-block;
-  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
   border-radius: 12px;
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(248, 113, 113, 0.18);
   color: #fecdd3;
-  font-weight: 700;
-  margin-bottom: 14px;
+  font-weight: 800;
 }
 
 .status.ok {
@@ -102,78 +167,113 @@ h2 {
   color: #bbf7d0;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 10px 14px;
+.link {
+  color: #67e8f9;
+  text-decoration: none;
+  font-weight: 700;
 }
 
-.label {
-  color: #94a3b8;
-  margin: 0 0 4px;
-}
-
-.value {
-  margin: 0;
-  font-size: 16px;
-}
-
-.mono {
-  font-family: 'SFMono-Regular', ui-monospace, Menlo, monospace;
-  font-size: 13px;
+.link:hover {
+  text-decoration: underline;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 8px;
 }
 
 button,
-.secondary {
+.ghost {
   border: none;
   outline: none;
-  padding: 10px 14px;
+  padding: 11px 14px;
   border-radius: 12px;
   cursor: pointer;
-  font-weight: 700;
-  color: #0f172a;
-  background: linear-gradient(120deg, #22d3ee, #a5f3fc);
+  font-weight: 800;
+  font-size: 14px;
   text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-  box-shadow: 0 8px 22px rgba(34, 211, 238, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
 }
 
-button:hover:not(:disabled),
-.secondary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 26px rgba(34, 211, 238, 0.45);
+button {
+  color: #0f172a;
+  background: linear-gradient(120deg, #22d3ee, #a5f3fc);
+  box-shadow: 0 10px 26px rgba(34, 211, 238, 0.35);
 }
 
 button:disabled {
-  opacity: 0.6;
+  opacity: 0.65;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
-.secondary {
-  background: rgba(148, 163, 184, 0.12);
-  color: #e2e8f0;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  box-shadow: none;
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(34, 211, 238, 0.45);
 }
 
 .ghost {
-  background: transparent;
   color: #e2e8f0;
-  border: 1px dashed rgba(148, 163, 184, 0.4);
-  box-shadow: none;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.26);
 }
 
-code {
-  background: rgba(148, 163, 184, 0.12);
-  padding: 2px 6px;
-  border-radius: 8px;
+.ghost:hover {
+  border-color: rgba(94, 234, 212, 0.55);
+  color: #67e8f9;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.eyebrow {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #7dd3fc;
+  margin: 0 0 6px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #f8fafc;
+}
+
+.hint {
+  margin: 0;
+  color: #94a3b8;
+}
+
+pre {
+  margin: 0;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  border-radius: 12px;
+  padding: 12px;
+  color: #e2e8f0;
   font-size: 13px;
+  overflow: auto;
+}
+
+@media (max-width: 720px) {
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  button,
+  .ghost {
+    width: 100%;
+    text-align: center;
+  }
 }
 </style>
